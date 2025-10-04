@@ -79,18 +79,6 @@ RecentNotes: {{Recent_Notes}}
 Return valid JSON.
 
 
-**Example Response**
-```json
-{
-  "summary": "ACME opportunity: mid-funnel, procurement engaged.",
-  "health_score": 72,
-  "risk_reasons": ["Pending PO", "Legal review open"],
-  "recommended_next_action": "Call procurement to confirm timeline.",
-  "email_subject": "Quick sync re: ACME procurement timeline",
-  "email_body": "Hi <Name>, thanks for the last call. Can we schedule a quick check-in to confirm next steps?",
-  "confidence": 0.86
-}
-
 
 
 **Example Response**
@@ -104,8 +92,30 @@ Return valid JSON.
   "email_body": "Hi <Name>, thanks for the last call. Can we schedule a quick check-in to confirm next steps?",
   "confidence": 0.86
 }
+```
 
 
+## 🧭 Implementation Steps
+
+1. **Create Custom Fields** on:
+   - `Opportunity` object  
+   - `AI_Interaction__c` custom object for logging prompts and responses  
+
+2. **Set Up Named Credential** for the LLM endpoint (secure API access).
+
+3. **Implement Apex Callout** to send the prompt and parse the JSON response.
+
+4. **Autolaunched Flow** calls the Apex class and updates Opportunity records.
+
+5. **Lightning Quick Action** (`AI: Summarize Opportunity`) triggers the Flow.
+
+6. **Batch Apex (optional)** for nightly scoring of all open Opportunities.
+
+7. **Dashboards** to visualize average AI Health Score and engagement trends.
+
+
+
+🧩 Sample Apex (Simplified)
 public with sharing class AIService {
     @AuraEnabled
     public static Map<String,Object> analyzeOpportunity(Id oppId) {
@@ -130,20 +140,21 @@ public with sharing class AIService {
     }
 }
 
-
 🌀 Flow Integration
 
-Add Apex Action → AIService.analyzeOpportunity.
+1. Add Apex Action → AIService.analyzeOpportunity.
 
-Map the output JSON fields to Opportunity updates.
+2. Map the output JSON fields to Opportunity updates.
 
-Create:
+3. Create:
 
-Task → Recommended next action.
+a. Task → Recommended next action.
 
-EmailMessage → Draft email body/subject.
+b. EmailMessage → Draft email body/subject.
 
-AI_Interaction__c → Log prompt/response.
+c. AI_Interaction__c → Log prompt/response.
+
+📊 Automation Modes
 | Mode             | Trigger                        | Use Case                               |
 | ---------------- | ------------------------------ | -------------------------------------- |
 | **On-Demand**    | Quick Action                   | Rep clicks "Summarize Opportunity"     |
@@ -152,65 +163,44 @@ AI_Interaction__c → Log prompt/response.
 
 
 🔐 Security Best Practices
+--> Use Named Credentials (never store API keys in code).
 
-Use Named Credentials (never store API keys in code).
+--> Restrict Apex/Flow access via Permission Sets.
 
-Restrict Apex/Flow access via Permission Sets.
+--> Redact PII in prompts.
 
-Redact PII in prompts.
-
-Log all interactions for audit and compliance.
+--> Log all interactions for audit and compliance.
 
 ✅ Testing & Monitoring
-
-Unit test with HttpCalloutMock.
-
-Sandbox test flows before production.
-
-Handle edge cases (missing data, malformed JSON).
-
-Create dashboards:
-
-Avg AI_Health_Score__c
-
-AI task completion rate
-
-Conversion % of AI-recommended deals
+1. Unit test with HttpCalloutMock.
+2. Sandbox test flows before production.
+3. Handle edge cases (missing data, malformed JSON).
+4. Create dashboards:
+5. Avg AI_Health_Score__c
+6. AI task completion rate
+7. Conversion % of AI-recommended deals
 
 📈 Success Metrics
-
-↓ Manual updates per rep.
-
-↑ Forecast accuracy.
-
-↑ Win rate for AI-scored top opportunities.
-
-↑ Rep satisfaction and CRM adoption.
+•	↓ Manual updates per rep.
+•	↑ Forecast accuracy.
+•	↑ Win rate for AI-scored top opportunities.
+•	↑ Rep satisfaction and CRM adoption.
 
 🧪 Example User Flow
 
-Rep opens Opportunity.
-
-Clicks “AI: Summarize Opportunity.”
-
-LLM analyzes and returns JSON insights.
-
-Opportunity gets updated → Task & email draft auto-created.
-
-Rep reviews → sends email → moves deal forward.
-
+1.	Rep opens Opportunity.
+2.	Clicks “AI: Summarize Opportunity.”
+3.	LLM analyzes and returns JSON insights.
+4.	Opportunity gets updated → Task & email draft auto-created.
+5.	Rep reviews → sends email → moves deal forward.
+ 
 🧰 Deployment Checklist
 
- Fields & objects created.
+1.	Fields & objects created.
+2.	Named Credential configured.
+3.	Apex callout class + test class deployed.
+4.	Flow wired to Apex output.
+5.	Quick Action added to Opportunity page.
+6.  Pilot rollout & feedback loop.
+7.	Metrics dashboard built.
 
- Named Credential configured.
-
- Apex callout class + test class deployed.
-
- Flow wired to Apex output.
-
- Quick Action added to Opportunity page.
-
- Pilot rollout & feedback loop.
-
- Metrics dashboard built.
