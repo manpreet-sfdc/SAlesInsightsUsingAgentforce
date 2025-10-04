@@ -1,4 +1,4 @@
-# SAlesInsightsUsingAgentforce
+# SalesInsightsUsingAgentforce
 # 🤖 AI-Assisted Opportunity Management (Agentforce for Sales)
 
 > **Goal:** Automate opportunity insights, next-best actions, and email drafts for sales reps using Salesforce + AI (Agentforce style).
